@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Class Reminder - Student & Teacher Portal</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <!-- Custom Style CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Glass Navigation Bar -->
+  <nav class="navbar navbar-expand-lg glass-nav sticky-top py-2">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+        <i class="fa-solid fa-graduation-cap text-indigo fs-3"></i>
+        <span>SmartClass<span class="text-secondary-accent">Remind</span></span>
+      </a>
+
+      <div class="d-flex align-items-center gap-3 ms-auto">
+        <!-- Current Active Portal Badge -->
+        <div id="active-role-container" class="d-flex align-items-center gap-2">
+          <span class="text-muted small d-none d-sm-inline">Current Mode:</span>
+          <span id="role-badge" class="role-badge student">
+            <i class="fa-solid fa-user-graduate me-1"></i> Student Portal
+          </span>
+        </div>
+
+        <!-- Notification Bell Dropdown -->
+        <div class="dropdown notification-bell">
+          <button class="btn btn-outline-secondary btn-icon position-relative border-0" id="notifDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa-solid fa-bell fs-5 text-muted"></i>
+            <span id="notif-badge-count" class="notification-count-badge">0</span>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end glass-card p-3 shadow-lg" style="width: 340px; max-height: 420px; overflow-y: auto;" aria-labelledby="notifDropdownBtn">
+            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary">
+              <h6 class="mb-0 fw-bold"><i class="fa-solid fa-bullhorn text-indigo me-2"></i>Teacher Broadcasts</h6>
+              <button class="btn btn-sm btn-link text-muted p-0 text-decoration-none" id="clear-notifs-btn">Clear All</button>
+            </div>
+            <div id="notif-list-container">
+              <div class="text-center py-4 text-muted small">
+                <i class="fa-regular fa-bell-slash fs-3 d-block mb-2 opacity-50"></i>
+                No new announcements or reminders yet.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dark/Light Theme Toggle -->
+        <button class="btn btn-outline-secondary border-0" id="theme-toggle-btn" title="Toggle Light/Dark Theme">
+          <i class="fa-solid fa-moon fs-5 text-warning" id="theme-icon"></i>
+        </button>
+
+        <!-- Role Switcher Button -->
+        <button class="btn btn-primary btn-sm px-3 rounded-pill fw-semibold shadow-sm" id="role-switch-btn" data-bs-toggle="modal" data-bs-target="#loginPortalModal">
+          <i class="fa-solid fa-right-to-bracket me-1"></i> Switch Portal
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Wrapper -->
+  <div class="d-flex main-wrapper">
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar">
+      <div class="nav-section-title">Student Portal</div>
+      <button class="sidebar-btn active" data-view="dashboard">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>Dashboard</span>
+      </button>
+      <button class="sidebar-btn" data-view="exams">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        <span>Exam Reminders</span>
+        <span class="badge bg-danger rounded-pill" id="exam-badge-count">0</span>
+      </button>
+      <button class="sidebar-btn" data-view="pomodoro">
+        <i class="fa-solid fa-stopwatch"></i>
+        <span>Pomodoro Timer</span>
+      </button>
+      <button class="sidebar-btn" data-view="assignments">
+        <i class="fa-solid fa-book-bookmark"></i>
+        <span>Assignments</span>
+        <span class="badge bg-warning text-dark rounded-pill" id="assignment-badge-count">0</span>
+      </button>
+      <button class="sidebar-btn" data-view="todo">
+        <i class="fa-solid fa-list-check"></i>
+        <span>To-Do List</span>
+      </button>
+      <button class="sidebar-btn" data-view="calendar">
+        <i class="fa-solid fa-calendar-days"></i>
+        <span>Calendar</span>
+      </button>
+      <button class="sidebar-btn" data-view="timetable">
+        <i class="fa-solid fa-table-cells"></i>
+        <span>Time Table</span>
+      </button>
+
+      <div class="nav-section-title mt-4">Teacher Portal</div>
+      <button class="sidebar-btn" data-view="teacher">
+        <i class="fa-solid fa-chalkboard-user"></i>
+        <span>Teacher Mode</span>
+        <span class="badge bg-purple rounded-pill ms-auto" style="background: var(--accent-purple);">Host</span>
+      </button>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+      <!-- VIEW 1: STUDENT DASHBOARD -->
+      <section id="view-dashboard" class="view-panel active">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+          <div>
+            <h2 class="fw-bold mb-1">Welcome Back, <span class="text-indigo" id="user-display-name">Alex</span>! 👋</h2>
+            <p class="text-muted mb-0">Here's your smart classroom overview and upcoming priorities for today.</p>
+          </div>
+          <button class="btn btn-outline-primary btn-sm rounded-pill" id="quick-pomodoro-btn">
+            <i class="fa-solid fa-play me-1"></i> Quick 25m Focus Session
+          </button>
+        </div>
+
+        <!-- Quick Summary Cards -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-3 col-sm-6">
+            <div class="glass-card stat-card d-flex align-items-center gap-3">
+              <div class="stat-icon">
+                <i class="fa-solid fa-file-pen text-danger"></i>
+              </div>
+              <div>
+                <h3 class="mb-0 fw-bold" id="stat-upcoming-exams">0</h3>
+                <span class="text-muted small">Upcoming Exams</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-sm-6">
+            <div class="glass-card stat-card d-flex align-items-center gap-3">
+              <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-warning);">
+                <i class="fa-solid fa-tasks"></i>
+              </div>
+              <div>
+                <h3 class="mb-0 fw-bold" id="stat-pending-assignments">0</h3>
+                <span class="text-muted small">Pending Homework</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-sm-6">
+            <div class="glass-card stat-card d-flex align-items-center gap-3">
+              <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-success);">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+              <div>
+                <h3 class="mb-0 fw-bold" id="stat-todos-today">0</h3>
+                <span class="text-muted small">Active To-Dos</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-sm-6">
+            <div class="glass-card stat-card d-flex align-items-center gap-3">
+              <div class="stat-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-secondary);">
+                <i class="fa-solid fa-clock"></i>
+              </div>
+              <div>
+                <h3 class="mb-0 fw-bold" id="stat-next-class">09:00 AM</h3>
+                <span class="text-muted small" id="stat-next-class-name">Next Period</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <!-- Live Exam Countdowns Preview -->
+          <div class="col-lg-7">
+            <div class="glass-card p-4 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="fa-solid fa-triangle-exclamation text-danger me-2"></i>Urgent Exam Countdowns</h5>
+                <button class="btn btn-sm btn-link text-indigo text-decoration-none" onclick="switchView('exams')">View All</button>
+              </div>
+              <div id="dashboard-exam-container" class="d-flex flex-column gap-3">
+                <!-- Exam preview items inserted via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Teacher Announcements & Today's Schedule -->
+          <div class="col-lg-5">
+            <div class="glass-card p-4 mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="fa-solid fa-bullhorn text-purple me-2"></i>Recent Teacher Broadcasts</h5>
+              </div>
+              <div id="dashboard-broadcasts-container" class="d-flex flex-column gap-2">
+                <!-- Broadcast cards inserted via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: EXAM REMINDERS -->
+      <section id="view-exams" class="view-panel">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+          <div>
+            <h2 class="fw-bold mb-1"><i class="fa-solid fa-clock-rotate-left text-danger me-2"></i>Exam Reminders</h2>
+            <p class="text-muted mb-0">Track upcoming midterms, finals, and quizzes with live real-time countdown timers.</p>
+          </div>
+          <button class="btn btn-primary rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#addExamModal">
+            <i class="fa-solid fa-plus me-1"></i> Add Personal Exam
+          </button>
+        </div>
+
+        <div class="row g-4" id="exams-list-container">
+          <!-- Exam cards loaded dynamically -->
+        </div>
+      </section>
+
+      <!-- VIEW 3: POMODORO TIMER -->
+      <section id="view-pomodoro" class="view-panel">
+        <div class="text-center mb-4">
+          <h2 class="fw-bold mb-1"><i class="fa-solid fa-stopwatch text-indigo me-2"></i>Smart Pomodoro Focus Timer</h2>
+          <p class="text-muted">Boost learning retention using timed study intervals and short breaks.</p>
+        </div>
+
+        <div class="glass-card p-4 pomodoro-container shadow-lg">
+          <!-- Preset Buttons -->
+          <div class="d-flex justify-content-center gap-2 mb-4">
+            <button class="timer-mode-btn active" id="mode-work" onclick="setPomodoroMode('work')">
+              <i class="fa-solid fa-brain me-1"></i> Focus (25m)
+            </button>
+            <button class="timer-mode-btn" id="mode-shortBreak" onclick="setPomodoroMode('shortBreak')">
+              <i class="fa-solid fa-mug-hot me-1"></i> Short Break (5m)
+            </button>
+            <button class="timer-mode-btn" id="mode-longBreak" onclick="setPomodoroMode('longBreak')">
+              <i class="fa-solid fa-couch me-1"></i> Long Break (15m)
+            </button>
+          </div>
+
+          <!-- Circular SVG Progress Ring -->
+          <div class="timer-circle-wrap">
+            <svg class="timer-svg" viewBox="0 0 280 280">
+              <circle class="timer-bg-path" cx="140" cy="140" r="130"></circle>
+              <circle id="timer-progress" class="timer-progress-path" cx="140" cy="140" r="130"></circle>
+            </svg>
+            <div class="timer-display">
+              <div id="pomodoro-time" class="timer-time">25:00</div>
+              <div id="pomodoro-status" class="text-muted fw-semibold uppercase small">Focus Session #1</div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-flex justify-content-center gap-3 mb-3">
+            <button class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm" id="pomodoro-toggle-btn">
+              <i class="fa-solid fa-play me-2"></i> Start Focus
+            </button>
+            <button class="btn btn-outline-secondary btn-lg rounded-pill px-4" id="pomodoro-reset-btn">
+              <i class="fa-solid fa-rotate-right me-1"></i> Reset
+            </button>
+          </div>
+
+          <div class="d-flex justify-content-around text-muted border-top border-secondary pt-3 mt-4">
+            <div>
+              <span class="d-block small text-muted">Completed Today</span>
+              <strong class="fs-5 text-main" id="pomodoro-completed-count">0 Sessions</strong>
+            </div>
+            <div>
+              <span class="d-block small text-muted">Audio Chime</span>
+              <button class="btn btn-sm btn-outline-secondary rounded-pill mt-1" id="pomodoro-sound-toggle">
+                <i class="fa-solid fa-volume-high text-success me-1"></i> Enabled
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: ASSIGNMENTS -->
+      <section id="view-assignments" class="view-panel">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+          <div>
+            <h2 class="fw-bold mb-1"><i class="fa-solid fa-book-bookmark text-warning me-2"></i>Assignments & Homework</h2>
+            <p class="text-muted mb-0">Track teacher-assigned tasks and submit your coursework before deadlines.</p>
+          </div>
+          <div class="d-flex gap-2">
+            <select class="form-select glass-card border-secondary text-main text-muted" id="assignment-filter-status" style="width: 160px;">
+              <option value="all">All Assignments</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row g-4" id="assignments-grid-container">
+          <!-- Assignments populated via JS -->
+        </div>
+      </section>
+
+      <!-- VIEW 5: TO-DO LIST -->
+      <section id="view-todo" class="view-panel">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+          <div>
+            <h2 class="fw-bold mb-1"><i class="fa-solid fa-list-check text-success me-2"></i>Daily To-Do List</h2>
+            <p class="text-muted mb-0">Personal study checklists and task management.</p>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-lg-4">
+            <div class="glass-card p-4">
+              <h5 class="fw-bold mb-3"><i class="fa-solid fa-plus-circle text-indigo me-2"></i>Create New Task</h5>
+              <form id="add-todo-form">
+                <div class="mb-3">
+                  <label class="form-label text-muted small fw-semibold">Task Title</label>
+                  <input type="text" class="form-control glass-card border-secondary text-main" id="todo-title-input" placeholder="e.g. Read Physics Chapter 4" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-muted small fw-semibold">Category</label>
+                  <select class="form-select glass-card border-secondary text-main" id="todo-category-input">
+                    <option value="Study">Study</option>
+                    <option value="Assignment">Assignment</option>
+                    <option value="Exam Prep">Exam Prep</option>
+                    <option value="Personal">Personal</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-muted small fw-semibold">Priority</label>
+                  <select class="form-select glass-card border-secondary text-main" id="todo-priority-input">
+                    <option value="Low">Low</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="High">High</option>
+                    <option value="Urgent">Urgent</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 rounded-pill shadow-sm">
+                  <i class="fa-solid fa-plus me-1"></i> Add Task
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-lg-8">
+            <div class="glass-card p-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">Task List</h5>
+                <div class="btn-group btn-group-sm" role="group">
+                  <button type="button" class="btn btn-outline-secondary active" onclick="filterTodos('all', this)">All</button>
+                  <button type="button" class="btn btn-outline-secondary" onclick="filterTodos('active', this)">Active</button>
+                  <button type="button" class="btn btn-outline-secondary" onclick="filterTodos('completed', this)">Completed</button>
+                </div>
+              </div>
+
+              <div id="todo-items-container">
+                <!-- Todo list items populated dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 6: CALENDAR -->
+      <section id="view-calendar" class="view-panel">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+          <div>
+            <h2 class="fw-bold mb-1"><i class="fa-solid fa-calendar-days text-indigo me-2"></i>Academic Calendar</h2>
+            <p class="text-muted mb-0">Overview of exam dates, project deadlines, and class notices.</p>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-outline-secondary btn-sm" id="cal-prev-month"><i class="fa-solid fa-chevron-left"></i></button>
+            <h5 class="fw-bold mb-0 px-2" id="cal-month-year-display">August 2026</h5>
+            <button class="btn btn-outline-secondary btn-sm" id="cal-next-month"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="glass-card p-4">
+          <div class="calendar-grid mb-2">
+            <div class="calendar-day-head">Sun</div>
+            <div class="calendar-day-head">Mon</div>
+            <div class="calendar-day-head">Tue</div>
+            <div class="calendar-day-head">Wed</div>
+            <div class="calendar-day-head">Thu</div>
+            <div class="calendar-day-head">Fri</div>
+            <div class="calendar-day-head">Sat</div>
+          </div>
+          <div class="calendar-grid" id="calendar-days-grid">
+            <!-- Calendar cells inserted dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 7: TIMETABLE -->
+      <section id="view-timetable" class="view-panel">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+          <div>
+            <h2 class="fw-bold mb-1"><i class="fa-solid fa-table-cells text-secondary-accent me-2"></i>Class Schedule & Timetable</h2>
+            <p class="text-muted mb-0">Weekly class periods with live active period highlighter.</p>
+          </div>
+          <span class="badge bg-info text-dark p-2 fs-6 rounded-pill">
+            <i class="fa-solid fa-clock me-1"></i> Current Time: <span id="timetable-live-clock">00:00:00</span>
+          </span>
+        </div>
+
+        <div class="glass-card p-3 overflow-auto">
+          <table class="timetable-grid">
+            <thead>
+              <tr>
+                <th style="width: 120px;">Time Slot</th>
+                <th>Monday</th>
+                <th>Tuesday</th>
+                <th>Wednesday</th>
+                <th>Thursday</th>
+                <th>Friday</th>
+              </tr>
+            </thead>
+            <tbody id="timetable-body-container">
+              <!-- Timetable rows dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- VIEW 8: TEACHER PORTAL ("TEACHER MODE") -->
+      <section id="view-teacher" class="view-panel">
+        <div class="teacher-banner mb-4">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+              <span class="badge bg-purple mb-2 px-3 py-1 uppercase" style="background: var(--accent-purple);">Teacher Control Suite</span>
+              <h2 class="fw-bold mb-1"><i class="fa-solid fa-chalkboard-user me-2"></i>Teacher Mode Announcement & Task Center</h2>
+              <p class="text-muted mb-0">Create exams, assignments, or notices. Submissions will trigger live alerts to student portals instantly!</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-success rounded-pill px-3 py-2"><i class="fa-solid fa-wifi me-1"></i> Cross-Tab Sync Active</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <!-- Creation Form -->
+          <div class="col-lg-5">
+            <div class="glass-card p-4">
+              <h5 class="fw-bold mb-3"><i class="fa-solid fa-paper-plane text-purple me-2"></i>Broadcast New Item to Class</h5>
+              <form id="teacher-broadcast-form">
+                <div class="mb-3">
+                  <label class="form-label text-muted small fw-semibold">Item Title *</label>
+                  <input type="text" class="form-control glass-card border-secondary text-main" id="teacher-title" placeholder="e.g. Physics Midterm Examination" required>
+                </div>
+
+                <div class="row g-2 mb-3">
+                  <div class="col-6">
+                    <label class="form-label text-muted small fw-semibold">Category *</label>
+                    <select class="form-select glass-card border-secondary text-main" id="teacher-category" required>
+                      <option value="Exam">Exam Reminder</option>
+                      <option value="Assignment">Assignment</option>
+                      <option value="Announcement">General Notice</option>
+                      <option value="Timetable">Timetable Alert</option>
+                    </select>
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label text-muted small fw-semibold">Priority *</label>
+                    <select class="form-select glass-card border-secondary text-main" id="teacher-priority" required>
+                      <option value="Urgent">🔴 Urgent</option>
+                      <option value="High" selected>🟠 High</option>
+                      <option value="Medium">🔵 Medium</option>
+                      <option value="Low">🟢 Low</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label text-muted small fw-semibold">Due / Event Date & Time *</label>
+                  <input type="datetime-local" class="form-control glass-card border-secondary text-main" id="teacher-date" required>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label text-muted small fw-semibold">Description / Instructions *</label>
+                  <textarea class="form-control glass-card border-secondary text-main" id="teacher-description" rows="4" placeholder="Enter detailed guidelines or instructions for students..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 rounded-pill py-2.5 fw-bold shadow">
+                  <i class="fa-solid fa-bullhorn me-2"></i> Publish & Notify Students
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Active Posted Items List -->
+          <div class="col-lg-7">
+            <div class="glass-card p-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="fa-solid fa-clock-history text-indigo me-2"></i>Published Classroom Items</h5>
+                <span class="text-muted small" id="teacher-items-count">0 Posted</span>
+              </div>
+
+              <div id="teacher-history-container" class="d-flex flex-column gap-3">
+                <!-- Teacher posted cards inserted via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container-custom"></div>
+
+  <!-- MODAL 1: LOGIN / ROLE SELECTOR MODAL -->
+  <div class="modal fade" id="loginPortalModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content glass-card border-secondary p-2">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-door-open me-2 text-indigo"></i>Select Portal Profile</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted small">Choose your login portal. Switching to Teacher Mode enables publishing reminders directly to all active student screens.</p>
+          <div class="row g-3">
+            <div class="col-6">
+              <div class="glass-card p-3 text-center cursor-pointer hover-border" onclick="switchRole('student')" data-bs-dismiss="modal" style="cursor: pointer;">
+                <div class="stat-icon mx-auto mb-2" style="width: 56px; height: 56px; font-size: 1.6rem;">
+                  <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <h6 class="fw-bold mb-1">Student Portal</h6>
+                <span class="text-muted small">View exams, tasks, timers & calendar</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="glass-card p-3 text-center cursor-pointer hover-border" onclick="switchRole('teacher')" data-bs-dismiss="modal" style="cursor: pointer;">
+                <div class="stat-icon mx-auto mb-2" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); width: 56px; height: 56px; font-size: 1.6rem;">
+                  <i class="fa-solid fa-chalkboard-user"></i>
+                </div>
+                <h6 class="fw-bold mb-1">Teacher Portal</h6>
+                <span class="text-muted small">Publish exams, tasks & send student alerts</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: ADD PERSONAL EXAM MODAL -->
+  <div class="modal fade" id="addExamModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content glass-card border-secondary">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-plus-circle text-danger me-2"></i>Add Exam Reminder</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="add-exam-form">
+            <div class="mb-3">
+              <label class="form-label text-muted small fw-semibold">Subject / Exam Title</label>
+              <input type="text" class="form-control glass-card border-secondary text-main" id="exam-title" placeholder="e.g. Advanced Calculus Final" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-muted small fw-semibold">Exam Date & Time</label>
+              <input type="datetime-local" class="form-control glass-card border-secondary text-main" id="exam-datetime" required>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-muted small fw-semibold">Subject Category</label>
+                <input type="text" class="form-control glass-card border-secondary text-main" id="exam-category" placeholder="e.g. Mathematics" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label text-muted small fw-semibold">Priority Level</label>
+                <select class="form-select glass-card border-secondary text-main" id="exam-priority">
+                  <option value="Urgent">Urgent</option>
+                  <option value="High" selected>High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-muted small fw-semibold">Syllabus / Room Notes</label>
+              <textarea class="form-control glass-card border-secondary text-main" id="exam-notes" rows="2" placeholder="Chapters 1-6, Hall B2"></textarea>
+            </div>
+            <button type="submit" class="btn btn-danger w-100 rounded-pill shadow-sm" data-bs-dismiss="modal">
+              <i class="fa-solid fa-save me-1"></i> Save Exam Reminder
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Application Main JS -->
+  <script src="js/app.js"></script>
+</body>
+</html>
